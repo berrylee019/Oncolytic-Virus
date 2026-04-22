@@ -58,7 +58,7 @@ def generate_blog_post_groq(data_df):
                 "content": prompt,
             }
         ],
-        model="llama3-8b-8192", # 무료로 쓰기 가장 안정적인 모델입니다.
+        model="llama-3.1-8b-instant", # 무료로 쓰기 가장 안정적인 모델입니다.
     )
     return chat_completion.choices[0].message.content
 
