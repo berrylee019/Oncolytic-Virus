@@ -87,3 +87,8 @@ if 'df' in st.session_state:
                 st.text_area("복사하여 블로그에 사용하세요", blog_draft, height=600)
             except Exception as e:
                 st.error(f"에러 발생: {e}")
+# app.py 파일의 가장 아랫부분에 추가하세요.
+
+st.markdown("---")  # 구분선
+st.caption("🚨 **의학적 면책 조항 (Disclaimer)**")
+st.caption("본 정보는 참고용이며 전문의의 진단을 대체할 수 없습니다. 정확한 진단 및 치료를 위해서는 반드시 의사와 상담하시기 바랍니다.")
