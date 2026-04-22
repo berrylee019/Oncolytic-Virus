@@ -42,37 +42,26 @@ def generate_blog_post_groq(data_df):
         context += f"[{i+1}] 제목: {row['Title']}\n스폰서: {row['Sponsor']}\n요약: {row['Summary']}\n\n"
 
     prompt = f"""
-        당신은 대한민국 최고의 의학 전문 블로거입니다. 
-        아래의 최신 임상 데이터를 바탕으로 네이버 블로그에 바로 올릴 수 있는 형태의 글을 쓰세요.
-    
-        [지시 사항]
-        1. 마크다운 기호(예: **, ##, ###)를 절대로 사용하지 마세요.
-        2. 소제목이나 강조하고 싶은 부분은 기호 대신 [제목] 또는 <내용>과 같은 괄호를 사용하거나 줄바꿈을 활용하세요.
-        3. 번역투(예: 일제삼, проти 등)를 완전히 없애고 한국인이 읽기에 자연스러운 문장으로 작성하세요.
-        4. 의학 용어는 일반인도 이해하기 쉽게 풀어서 설명하세요.
-        5. 서론-본론-결론의 구성을 유지하고, 마지막에 희망적인 메시지를 담으세요.
-    
-        [데이터]
-        {context}
-        """
+    당신은 대한민국 최고의 의학 전문 블로거입니다. 
+    마크다운 기호(별표 등)를 절대 사용하지 말고, 한국어로 자연스럽게 작성하세요.
+    제목은 [제목] 형식을 사용하세요.
 
-    # Groq은 Llama 3나 Mixtral 모델을 사용합니다. 속도가 매우 빠릅니다.
+    [데이터]
+    {context}
+    """
+
     chat_completion = client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama-3.1-8b-instant",
-        )
-        
-        # 1. AI가 준 답변을 가져옵니다.
-        raw_content = chat_completion.choices[0].message.content
-        
-        # 2. 강제로 마크다운 기호를 삭제하는 로직 추가
-        # 별표(*)를 모두 제거합니다.
-        clean_content = raw_content.replace('*', '')
-        
-        # 3. 추가로 지저분한 기호가 있다면 여기서 더 제거할 수 있습니다.
-        # clean_content = clean_content.replace('#', '') 
-        
-        return clean_content
+        messages=[{"role": "user", "content": prompt}],
+        model="llama-3.1-8b-instant",
+    )
+    
+    # 이 부분의 들여쓰기를 이전 줄(chat_completion)과 똑같이 맞춰야 합니다.
+    raw_content = chat_completion.choices[0].message.content
+    
+    # 별표(*) 기호를 강제로 삭제하여 출력합니다.
+    clean_content = raw_content.replace('*', '')
+    
+    return clean_content
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="OV Trial Blog AI (Groq)", layout="wide")
