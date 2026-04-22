@@ -58,15 +58,21 @@ def generate_blog_post_groq(data_df):
 
     # Groq은 Llama 3나 Mixtral 모델을 사용합니다. 속도가 매우 빠릅니다.
     chat_completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
-        model="llama-3.1-8b-instant", # 무료로 쓰기 가장 안정적인 모델입니다.
-    )
-    return chat_completion.choices[0].message.content
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.1-8b-instant",
+        )
+        
+        # 1. AI가 준 답변을 가져옵니다.
+        raw_content = chat_completion.choices[0].message.content
+        
+        # 2. 강제로 마크다운 기호를 삭제하는 로직 추가
+        # 별표(*)를 모두 제거합니다.
+        clean_content = raw_content.replace('*', '')
+        
+        # 3. 추가로 지저분한 기호가 있다면 여기서 더 제거할 수 있습니다.
+        # clean_content = clean_content.replace('#', '') 
+        
+        return clean_content
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="OV Trial Blog AI (Groq)", layout="wide")
