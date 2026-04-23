@@ -1,3 +1,4 @@
+import json
 import streamlit as st
 import os
 import pickle
@@ -78,10 +79,14 @@ def get_blogger_service():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file('client_secrets.json', SCOPES)
+            # 💡 파일 대신 Secrets의 텍스트 데이터를 사용합니다
+            client_secrets_data = json.loads(st.secrets["GOOGLE_CLIENT_SECRETS"])
+            flow = InstalledAppFlow.from_client_config(client_secrets_data, SCOPES)
             creds = flow.run_local_server(port=0)
+            
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
+            
     return build('blogger', 'v3', credentials=creds)
 
 def post_to_blogspot(title, content):
