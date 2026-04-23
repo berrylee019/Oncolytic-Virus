@@ -2,3 +2,5 @@ streamlit
 requests
 pandas
 groq
+google-auth-oauthlib
+google-api-python-client
