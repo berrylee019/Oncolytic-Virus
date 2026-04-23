@@ -101,6 +101,10 @@ def post_to_blogspot(title, content):
 st.set_page_config(page_title="항암 바이러스 리포터", layout="wide")
 st.title("🏥 항암 바이러스 임상 데이터 분석기")
 
+# ⭐ [중요] 세션 상태 초기화: 앱이 처음 실행될 때 빈 칸을 미리 만들어둡니다.
+if "generated_html" not in st.session_state:
+    st.session_state.generated_html = ""
+    
 # [데이터 로드 부분] 
 # 형님이 기존에 쓰시던 데이터 로딩 코드(CSV 읽기 등)가 있다면 여기에 넣어주세요.
 # 예시: df = pd.read_csv('your_data.csv')
