@@ -35,7 +35,7 @@ def post_to_blogspot(blog_id, title, content):
         "content": content
     }
     # 블로그에 포스팅 게시
-    posts = service.posts().insert(blogId=blog_id, body=body).execute()
+    posts = service.posts().insert(blogId=5643916484082800286, body=body).execute()
     return posts.get('url')
 
 # --- Streamlit UI 에 버튼 추가 ---
