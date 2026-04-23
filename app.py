@@ -1,52 +1,66 @@
+import streamlit as st
 import os
 import pickle
+import pandas as pd
+from groq import Groq
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-# Blogger API 권한 범위
+# 1. 초기 설정 및 API 키 (형님의 기존 환경 변수 설정 유지)
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+BLOG_ID = "형님의_실제_블로그_ID" # 여기에 블로그 ID를 꼭 넣어주세요!
+
+# 2. Blogger API 인증 함수
 SCOPES = ['https://www.googleapis.com/auth/blogger']
 
 def get_blogger_service():
     creds = None
-    # 이전에 인증한 토큰이 있는지 확인
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
-    
-    # 인증 정보가 없거나 만료된 경우 재인증
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'client_secrets.json', SCOPES)
+            # 주의: Streamlit Cloud에서는 로컬 서버 방식이 안 될 수 있음
+            flow = InstalledAppFlow.from_client_secrets_file('client_secrets.json', SCOPES)
             creds = flow.run_local_server(port=0)
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
-
     return build('blogger', 'v3', credentials=creds)
 
-def post_to_blogspot(blog_id, title, content):
+def post_to_blogspot(title, content):
     service = get_blogger_service()
-    body = {
-        "kind": "blogger#post",
-        "title": title,
-        "content": content
-    }
-    # 블로그에 포스팅 게시
-    posts = service.posts().insert(blogId=5643916484082800286, body=body).execute()
+    body = {"kind": "blogger#post", "title": title, "content": content}
+    posts = service.posts().insert(blogId=BLOG_ID, body=body).execute()
     return posts.get('url')
 
-# --- Streamlit UI 에 버튼 추가 ---
-if st.button("🚀 블로그스팟으로 즉시 전송"):
-    with st.spinner('자동 포스팅 중...'):
+# 3. 메인 UI 및 로직
+st.title("🏥 항암 바이러스 임상 데이터 분석기")
+
+# 세션 상태 초기화 (생성된 글을 저장해두기 위함)
+if "generated_html" not in st.session_state:
+    st.session_state.generated_html = ""
+
+# [데이터 분석 및 글 생성 버튼] - 형님의 기존 로직
+if st.button("🔍 최신 데이터 분석 및 블로그 초안 생성"):
+    # (여기에 형님의 데이터 분석 및 Groq 호출 로직이 들어갑니다)
+    # 임시 결과물 예시 (실제로는 함수 호출 결과가 들어가야 함)
+    result_html = "<h3>AI가 생성한 포스팅 내용...</h3>" 
+    st.session_state.generated_html = result_html
+    st.write("초안이 생성되었습니다. 아래 버튼을 눌러 블로그로 전송하세요!")
+
+# 4. 블로그 전송 버튼 (초안이 있을 때만 노출)
+if st.session_state.generated_html:
+    st.markdown("---")
+    st.subheader("📝 생성된 포스팅 미리보기")
+    st.components.v1.html(st.session_state.generated_html, height=400, scrolling=True)
+    
+    if st.button("🚀 블로그스팟으로 즉시 전송"):
         try:
-            # 블로그 ID는 블로그 설정 주소창에서 확인할 수 있습니다.
-            blog_id = "형님의_블로그_ID" 
-            post_url = post_to_blogspot(blog_id, "4세대 항암제 최신 임상 정리", blog_html_content)
-            st.success(f"포스팅 성공! 링크: {post_url}")
-            
-            # (옵션) 형님의 'AI_Chef_Contents' 시트처럼 포스팅 상태를 기록하면 관리하기 좋습니다.
+            with st.spinner("블로그에 글을 올리는 중입니다..."):
+                url = post_to_blogspot("4세대 항암제 최신 임상 정보", st.session_state.generated_html)
+                st.success(f"포스팅 성공! 주소: {url}")
         except Exception as e:
-            st.error(f"포스팅 실패: {e}")
+            st.error(f"전송 실패: {e}")
